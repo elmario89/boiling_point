@@ -19,16 +19,46 @@
     return heatCapacity * tempDiff * weight;
   };
 
-  var calculateMinutesNeeded = function(heatNeeded, heatEffectivePower) {
+  function CalculateMinutesNeeded(heatNeeded, heatEffectivePower) {
     return (heatNeeded / heatEffectivePower) / 60
   };
 
   var tempDiff = calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
   var heatNeeded = calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff);
   var heaterEffectivePower = calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
-
-  var timeToBoilWaterFromSnow = calculateMinutesNeeded(heatNeeded, heaterEffectivePower);
+  var timeToBoilWaterFromSnow = CalculateMinutesNeeded(heatNeeded, heaterEffectivePower);
 
   console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + timeToBoilWaterFromSnow + ' minutes');
+
+  function coffeeMachine(amount, power){
+    this.amount = amount;
+    this.power = power;
+
+    var timer;
+
+    function BoilTimeProto(heat, heatEffPower) {
+      console.log('br');
+    }
+
+    var getBoilingTime = new CalculateMinutesNeeded(3000, 300);
+
+    function isReady() {
+      alert('Ваш кофе готов');
+    }
+
+    this.run = function(){
+      setTimeout(function(){
+        isReady();
+      }, getBoilingTime);
+    };
+
+    this.stop = function(){
+      clearTimeout(timer);
+    };
+  };
+
+  var BORK = new coffeeMachine(300, 300);
+
+  BORK.run();
 
 </script>

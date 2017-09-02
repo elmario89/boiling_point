@@ -1,0 +1,34 @@
+<script>
+  var WATER_BOILING_POINT = 100;
+  var WATER_HEAT_CAPACITY = 4220;
+  var SNOW_TEMP = -16;
+  var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
+
+  var heaterPower = 2200; // average electric kettle power (in kilowatts)
+  var snowMass = 1.7; // average amount of kettles (liters or kilos)
+
+  var calculateTempDifference = function(startPoint, endPoint) {
+    return (endPoint - startPoint);
+  };
+
+  var calculateHeaterEffectivePower = function(power, efficiencyFactor) {
+    return power * efficiencyFactor;
+  };
+
+  var calculateHeatNeeded = function(heatCapacity, weight, tempDiff) {
+    return heatCapacity * tempDiff * weight;
+  };
+
+  var calculateMinutesNeeded = function(heatNeeded, heatEffectivePower) {
+    return (heatNeeded / heatEffectivePower) / 60
+  };
+
+  var tempDiff = calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
+  var heatNeeded = calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff);
+  var heaterEffectivePower = calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
+
+  var timeToBoilWaterFromSnow = calculateMinutesNeeded(heatNeeded, heaterEffectivePower);
+
+  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + timeToBoilWaterFromSnow + ' minutes');
+
+</script>

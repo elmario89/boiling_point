@@ -1,3 +1,11 @@
+<button id='runBork'>cup of coffee BORK</button>
+<button id='stopBork'>stop BORK</button>
+<br>
+<button id='runTefal'>cup of coffee Tefal</button>
+<button id='stopTefal'>stop Tefal</button>
+<br>
+<span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
+
 <script>
   var WATER_BOILING_POINT = 100;
   var WATER_HEAT_CAPACITY = 4220;
@@ -8,57 +16,114 @@
   var snowMass = 1.7; // average amount of kettles (liters or kilos)
 
   var calculateTempDifference = function(startPoint, endPoint) {
-    return (endPoint - startPoint);
+    this.tempDifference = endPoint - startPoint;
   };
 
   var calculateHeaterEffectivePower = function(power, efficiencyFactor) {
-    return power * efficiencyFactor;
+    this.effectivePower = power * efficiencyFactor;
   };
 
   var calculateHeatNeeded = function(heatCapacity, weight, tempDiff) {
-    return heatCapacity * tempDiff * weight;
+    this.heatNeeded = heatCapacity * tempDiff * weight;
   };
 
-  function CalculateMinutesNeeded(heatNeeded, heatEffectivePower) {
-    return (heatNeeded / heatEffectivePower) / 60
+  function calculateMinutesNeeded(heatNeeded, heatEffectivePower) {
+    this.seconds = heatNeeded / heatEffectivePower
   };
 
-  var tempDiff = calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
-  var heatNeeded = calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff);
-  var heaterEffectivePower = calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
-  var timeToBoilWaterFromSnow = CalculateMinutesNeeded(heatNeeded, heaterEffectivePower);
+  var tempDiff = new calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
+  var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff.tempDifference);
+  var heaterEffectivePower = new calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
+  var timeToBoilWaterFromSnow = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
 
-  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + timeToBoilWaterFromSnow + ' minutes');
+  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + (timeToBoilWaterFromSnow.seconds / 60) + ' minutes');
 
-  function coffeeMachine(amount, power){
+
+  function coffeeMachine(amount, power, startTemperature, container){
     this.amount = amount;
     this.power = power;
 
-    var timer;
+    var WATER_BOILING_POINT = 100;
+    var WATER_HEAT_CAPACITY = 4220;
+    var EFFICIENCY_FACTOR = 0.8;
 
-    function BoilTimeProto(heat, heatEffPower) {
-      console.log('br');
-    }
+    var calculateTempDiff = new calculateTempDifference(startTemperature, WATER_BOILING_POINT);
+    var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, amount, calculateTempDiff.tempDifference);
+    var heaterEffectivePower = new calculateHeaterEffectivePower(power, EFFICIENCY_FACTOR);
+    var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
 
-    var getBoilingTime = new CalculateMinutesNeeded(3000, 300);
+    var timer, interval;
 
     function isReady() {
-      alert('Ваш кофе готов');
+      console.log('Your coffee is ready');
     }
 
-    this.run = function(){
+    function isCanceled() {
+      console.log('You canceled operation');
+    }
+
+    function displayTimer(duration, container) {
+      timer = duration;
+      var minutes = 1;
+      var seconds = 60;
+
+      interval = setInterval(function () {
+          minutes = parseInt(timer / 60, 10)
+          seconds = parseInt(timer % 60, 10);
+
+          minutes = minutes < 10 ? "0" + minutes : minutes;
+          seconds = seconds < 10 ? "0" + seconds : seconds;
+
+          container.textContent = minutes + ":" + seconds;
+
+          if (--timer < 0) {
+              timer = duration;
+              clearInterval(interval);
+          }
+      }, 1000);
+    }
+
+    this.run = function() {
+      displayTimer(getBoilingTime.seconds, container);
+
       setTimeout(function(){
         isReady();
-      }, getBoilingTime);
+      }, getBoilingTime.seconds*1000);
     };
 
-    this.stop = function(){
-      clearTimeout(timer);
+    this.stop = function() {
+      console.log(timer, interval);
+      timer = 0;
+      clearInterval(interval);
+      isCanceled();
     };
   };
 
-  var BORK = new coffeeMachine(300, 300);
+  var borkRun = document.querySelector('#runBork');
+  var borkStop = document.querySelector('#stopBork')
+  var tefalRun = document.querySelector('#runTefal');
+  var tefalStop = document.querySelector('#stopTefal')
+  var container = document.querySelector('.timer');
 
-  BORK.run();
+  borkRun.addEventListener('click', function(){
+    var BORK = new coffeeMachine(0.3, 2000, 80, container);
+    BORK.run();
+  });
+
+  borkStop.addEventListener('click', function(){
+    var BORK = new coffeeMachine(0.35, 3000, 80, container);
+    BORK.stop();
+  });
+
+  tefalRun.addEventListener('click', function(){
+    var Tefal = new coffeeMachine(0.35, 3000, 80, container);
+    Tefal.run();
+  });
+
+  tefalStop.addEventListener('click', function(){
+    var Tefal = new coffeeMachine(0.35, 3000, 80, container);
+    Tefal.stop();
+  });
 
 </script>
+

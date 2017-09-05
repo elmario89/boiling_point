@@ -1,8 +1,10 @@
 <button id='runBork'>cup of coffee BORK</button>
-<button id='stopBork'>stop BORK</button>
+<button id='stopBork' disabled>stop BORK</button>
+<br>
 <br>
 <button id='runTefal'>cup of coffee Tefal</button>
-<button id='stopTefal'>stop Tefal</button>
+<button id='stopTefal' disabled>stop Tefal</button>
+<br>
 <br>
 <span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
 
@@ -38,7 +40,6 @@
 
   console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + (timeToBoilWaterFromSnow.seconds / 60) + ' minutes');
 
-
   function coffeeMachine(amount, power, startTemperature, container){
     this.amount = amount;
     this.power = power;
@@ -52,7 +53,7 @@
     var heaterEffectivePower = new calculateHeaterEffectivePower(power, EFFICIENCY_FACTOR);
     var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
 
-    var timer, interval;
+    var timer, interval, minutes, seconds;
 
     function isReady() {
       console.log('Your coffee is ready');
@@ -64,8 +65,8 @@
 
     function displayTimer(duration, container) {
       timer = duration;
-      var minutes = 1;
-      var seconds = 60;
+      minutes = 1;
+      seconds = 60;
 
       interval = setInterval(function () {
           minutes = parseInt(timer / 60, 10)
@@ -83,6 +84,11 @@
       }, 1000);
     }
 
+    function clearTimer(container) {
+      container.textContent = '00:00';
+      clearInterval(interval);
+    }
+
     this.run = function() {
       displayTimer(getBoilingTime.seconds, container);
 
@@ -92,9 +98,7 @@
     };
 
     this.stop = function() {
-      console.log(timer, interval);
-      timer = 0;
-      clearInterval(interval);
+      clearTimer(container);
       isCanceled();
     };
   };
@@ -105,23 +109,35 @@
   var tefalStop = document.querySelector('#stopTefal')
   var container = document.querySelector('.timer');
 
+  function disabler(itemToDisable, bool) {
+    itemToDisable.disabled = bool;
+  };
+
+  var BORK;
   borkRun.addEventListener('click', function(){
-    var BORK = new coffeeMachine(0.3, 2000, 80, container);
+    disabler(borkStop, false);
+
+    BORK = new coffeeMachine(0.3, 2000, 80, container);
     BORK.run();
   });
 
   borkStop.addEventListener('click', function(){
-    var BORK = new coffeeMachine(0.35, 3000, 80, container);
+    disabler(borkStop, true);
+
     BORK.stop();
   });
 
+  var Tefal;
   tefalRun.addEventListener('click', function(){
-    var Tefal = new coffeeMachine(0.35, 3000, 80, container);
+    disabler(tefalStop, false);
+
+    Tefal = new coffeeMachine(0.35, 3000, 80, container);
     Tefal.run();
   });
 
   tefalStop.addEventListener('click', function(){
-    var Tefal = new coffeeMachine(0.35, 3000, 80, container);
+    disabler(tefalStop, true);
+
     Tefal.stop();
   });
 

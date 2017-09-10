@@ -1,3 +1,49 @@
+<h3>Bolign point calculator</h3>
+<p>Calculate time to boil different substance, enter name and data (you can find all the data in the internet).</p>
+<p>For example start temperature of snow is -16 C, boiling temperature of water is 100 C (snow converts to water).</p>
+<p>You can use electric kettle as a heater, It's power ~2200 watts and effective power is 0.8 (this depends on the wires, the environment and so on - 1 is fully effective).</p>
+<p>Enter weight in killos (0.5 is half of a killo).</p>
+
+Example of data:
+<ul>
+  <li>Snow</li>
+  <li>-16</li>
+  <li>100</li>
+  <li>2200</li>
+  <li>0.8</li>
+  <li>4220</li>
+  <li>1.7</li>
+</ul>
+<span> Result of example data: </span>
+<div id='resultExample'>
+  <strong></strong>
+</div>
+<br>
+<br>
+All of these inputs are <strong>requared:</strong></p>
+<form id='boiling' action='calculateTime'>
+  <input name='name' type="text" placeholder="Name of substance to boil" step='0.01' required>
+  <br>
+  <input name='start' type="number" placeholder="Start temperature" step='0.01' required>
+  <br>
+  <input name='end' type="number" placeholder="Boiling point temperature" step='0.01' required>
+  <br>
+  <input name='power' type="number" placeholder="Power of heater" step='0.01' required>
+  <br>
+  <input name='effectivePower' type="number" placeholder="Effective power of heater" step='0.01' required>
+  <br>
+  <input name='heat' type="number" placeholder="Substance heat capacity" step='0.01' required>
+  <br>
+  <input name='weight' type="number" placeholder="Weight of substance to boil" step='0.01' required>
+  <br>
+  <button type='submit'>Calculate</button>
+</form>
+<div id='result' style='color: red'>
+  <strong></strong>
+</div>
+
+<hr>
+<h3>Coffee machines</h3>
 <button id='runBork'>cup of coffee BORK</button>
 <button id='stopBork' disabled>stop BORK</button>
 <br>
@@ -9,27 +55,6 @@
 <span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
 
 <script>
-  // var calculateTempDifference = function(startPoint, endPoint) {
-  //   this.tempDifference = endPoint - startPoint;
-  // };
-
-  // var calculateHeaterEffectivePower = function(power, efficiencyFactor) {
-  //   this.effectivePower = power * efficiencyFactor;
-  // };
-
-  // var calculateHeatNeeded = function(heatCapacity, weight, tempDiff) {
-  //   this.heatNeeded = heatCapacity * tempDiff * weight;
-  // };
-
-  // function calculateMinutesNeeded(heatNeeded, heatEffectivePower) {
-  //   this.seconds = heatNeeded / heatEffectivePower
-  // };
-
-  // var tempDiff = new calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
-  // var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff.tempDifference);
-  // var heaterEffectivePower = new calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
-  // var timeToBoilWaterFromSnow = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
-
   function Formulas() {
     this.tempDifference = function(startPoint, endPoint) {
       return (endPoint - startPoint);
@@ -69,27 +94,15 @@
     };
   }
 
-  function BoilingTime(startPoint, endPoint, power, effectivePower, heatCapacity, weight) {
+  function BoilingTime(data) {
     Formulas.call(this);
     var parent = this;
 
-    this.tempDifference = parent.tempDifference(startPoint, endPoint);
-    this.heaterEffectivePower = parent.heaterEffectivePower(power, effectivePower);
-    this.heat = parent.heat(heatCapacity, weight, this.tempDifference);
+    this.tempDifference = parent.tempDifference(data[0], data[1]);
+    this.heaterEffectivePower = parent.heaterEffectivePower(data[2], data[3]);
+    this.heat = parent.heat(data[4], data[5], this.tempDifference);
     this.seconds = parent.seconds(this.heat, this.heaterEffectivePower);
   };
-
-  var WATER_BOILING_POINT = 100;
-  var WATER_HEAT_CAPACITY = 4220;
-  var SNOW_TEMP = -16;
-  var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
-  var heaterPower = 2200; // average electric kettle power (in kilowatts)
-  var snowMass = 1.7; // average amount of kettles (liters or kilos)
-
-  var boilSnow = new BoilingTime(SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass);
-
-  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + (boilSnow.seconds / 60) + ' minutes');
-
 
   function coffeeMachine(amount, power, startTemperature, container){
     this.amount = amount;
@@ -141,19 +154,6 @@
       container.textContent = '00:00';
       clearInterval(interval);
     }
-
-    // this.run = function() {
-    //   displayTimer(getBoilingTime.seconds, container);
-
-    //   setTimeout(function(){
-    //     isReady();
-    //   }, getBoilingTime.seconds*1000);
-    // };
-
-    // this.stop = function() {
-    //   clearTimer(container);
-    //   isCanceled();
-    // };
   };
 
   var borkRun = document.querySelector('#runBork');
@@ -194,5 +194,41 @@
     Tefal.stop();
   });
 
-</script>
+  var WATER_BOILING_POINT = 100;
+  var WATER_HEAT_CAPACITY = 4220;
+  var SNOW_TEMP = -16;
+  var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
+  var heaterPower = 2200; // average electric kettle power (in kilowatts)
+  var snowMass = 1.7; // average amount of kettles (liters or kilos)
 
+  var boilSnow = new BoilingTime([SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass]);
+
+  var resultExampleContainer = document.querySelector('#resultExample strong');
+
+  resultExampleContainer.innerHTML = 'The time you need to boil ' + snowMass + 'kg of snow is ' + (boilSnow.seconds / 60) + ' minutes';
+
+  var boilingForm = document.querySelector('#boiling');
+  var resultContainer = document.querySelector('#result strong');
+
+  boilingForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var elements = boilingForm.elements;
+    var data = [];
+
+    for (var i = 0, element; element = elements[i++];) {
+        if (element.type !== "number") {
+          continue;
+        } else {
+          data.push(parseFloat(element.value));
+        }
+    }
+
+    var minutesToBoil = new BoilingTime(data);
+    var name = boilingForm.name.value;
+    var weight = boilingForm.weight.value;
+
+    resultContainer.innerHTML = 'The time you need to boil ' + weight + ' kg of ' + name + ' are ' + (minutesToBoil.seconds / 60) + ' minutes';
+  });
+
+</script>

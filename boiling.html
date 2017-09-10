@@ -9,36 +9,87 @@
 <span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
 
 <script>
+  // var calculateTempDifference = function(startPoint, endPoint) {
+  //   this.tempDifference = endPoint - startPoint;
+  // };
+
+  // var calculateHeaterEffectivePower = function(power, efficiencyFactor) {
+  //   this.effectivePower = power * efficiencyFactor;
+  // };
+
+  // var calculateHeatNeeded = function(heatCapacity, weight, tempDiff) {
+  //   this.heatNeeded = heatCapacity * tempDiff * weight;
+  // };
+
+  // function calculateMinutesNeeded(heatNeeded, heatEffectivePower) {
+  //   this.seconds = heatNeeded / heatEffectivePower
+  // };
+
+  // var tempDiff = new calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
+  // var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff.tempDifference);
+  // var heaterEffectivePower = new calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
+  // var timeToBoilWaterFromSnow = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
+
+  function Formulas() {
+    this.tempDifference = function(startPoint, endPoint) {
+      return (endPoint - startPoint);
+    };
+
+    this.heaterEffectivePower = function(power, efficiencyFactor) {
+      return (power * efficiencyFactor);
+    };
+
+    this.heat = function(heatCapacity, weight, tempDiff) {
+      return (heatCapacity * tempDiff * weight);
+    };
+
+    this.seconds = function (heatNeeded, heatEffectivePower) {
+      return (heatNeeded / heatEffectivePower);
+    };
+  }
+
+  function Machine() {
+    this.enabled = false;
+
+    this.run = function() {
+      // displayTimer(getBoilingTime.seconds, container);
+      this.enabled = true;
+      console.log('machine is running');
+
+      // setTimeout(function(){
+      //   isReady();
+      // }, getBoilingTime.seconds*1000);
+    };
+
+    this.stop = function() {
+      this.enabled = false;
+      console.log('machine stopped');
+      // clearTimer(container);
+      // isCanceled();
+    };
+  }
+
+  function BoilingTime(startPoint, endPoint, power, effectivePower, heatCapacity, weight) {
+    Formulas.call(this);
+    var parent = this;
+
+    this.tempDifference = parent.tempDifference(startPoint, endPoint);
+    this.heaterEffectivePower = parent.heaterEffectivePower(power, effectivePower);
+    this.heat = parent.heat(heatCapacity, weight, this.tempDifference);
+    this.seconds = parent.seconds(this.heat, this.heaterEffectivePower);
+  };
+
   var WATER_BOILING_POINT = 100;
   var WATER_HEAT_CAPACITY = 4220;
   var SNOW_TEMP = -16;
   var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
-
   var heaterPower = 2200; // average electric kettle power (in kilowatts)
   var snowMass = 1.7; // average amount of kettles (liters or kilos)
 
-  var calculateTempDifference = function(startPoint, endPoint) {
-    this.tempDifference = endPoint - startPoint;
-  };
+  var boilSnow = new BoilingTime(SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass);
 
-  var calculateHeaterEffectivePower = function(power, efficiencyFactor) {
-    this.effectivePower = power * efficiencyFactor;
-  };
+  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + (boilSnow.seconds / 60) + ' minutes');
 
-  var calculateHeatNeeded = function(heatCapacity, weight, tempDiff) {
-    this.heatNeeded = heatCapacity * tempDiff * weight;
-  };
-
-  function calculateMinutesNeeded(heatNeeded, heatEffectivePower) {
-    this.seconds = heatNeeded / heatEffectivePower
-  };
-
-  var tempDiff = new calculateTempDifference(SNOW_TEMP, WATER_BOILING_POINT);
-  var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, snowMass, tempDiff.tempDifference);
-  var heaterEffectivePower = new calculateHeaterEffectivePower(heaterPower, EFFICIENCY_FACTOR);
-  var timeToBoilWaterFromSnow = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
-
-  console.log('The time you need to boil ' + snowMass + 'kg of snow is ' + (timeToBoilWaterFromSnow.seconds / 60) + ' minutes');
 
   function coffeeMachine(amount, power, startTemperature, container){
     this.amount = amount;
@@ -54,6 +105,8 @@
     var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
 
     var timer, interval, minutes, seconds;
+
+    Machine.call(this);
 
     function isReady() {
       console.log('Your coffee is ready');
@@ -89,18 +142,18 @@
       clearInterval(interval);
     }
 
-    this.run = function() {
-      displayTimer(getBoilingTime.seconds, container);
+    // this.run = function() {
+    //   displayTimer(getBoilingTime.seconds, container);
 
-      setTimeout(function(){
-        isReady();
-      }, getBoilingTime.seconds*1000);
-    };
+    //   setTimeout(function(){
+    //     isReady();
+    //   }, getBoilingTime.seconds*1000);
+    // };
 
-    this.stop = function() {
-      clearTimer(container);
-      isCanceled();
-    };
+    // this.stop = function() {
+    //   clearTimer(container);
+    //   isCanceled();
+    // };
   };
 
   var borkRun = document.querySelector('#runBork');

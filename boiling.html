@@ -45,14 +45,14 @@ All of these inputs are <strong>requared:</strong></p>
 <hr>
 <h3>Coffee machines</h3>
 <button id='runBork'>cup of coffee BORK</button>
-<button id='stopBork' disabled>stop BORK</button>
+<button id='stopBork'>stop BORK</button>
 <br>
 <br>
 <button id='runTefal'>cup of coffee Tefal</button>
-<button id='stopTefal' disabled>stop Tefal</button>
+<button id='stopTefal'>stop Tefal</button>
 <br>
 <br>
-<span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
+<span>Time until you'll get a fresh cup of coffee: </span> <span class='timer'></span>
 
 <script>
   function Formulas() {
@@ -74,23 +74,14 @@ All of these inputs are <strong>requared:</strong></p>
   }
 
   function Machine() {
-    this.enabled = false;
+    this._enabled = false;
 
-    this.run = function() {
-      // displayTimer(getBoilingTime.seconds, container);
-      this.enabled = true;
-      console.log('machine is running');
-
-      // setTimeout(function(){
-      //   isReady();
-      // }, getBoilingTime.seconds*1000);
+    this.enable = function() {
+      this._enabled = true;
     };
 
-    this.stop = function() {
-      this.enabled = false;
-      console.log('machine stopped');
-      // clearTimer(container);
-      // isCanceled();
+    this.disable = function() {
+      this._enabled = false;
     };
   }
 
@@ -104,102 +95,93 @@ All of these inputs are <strong>requared:</strong></p>
     this.seconds = parent.seconds(this.heat, this.heaterEffectivePower);
   };
 
-  function coffeeMachine(amount, power, startTemperature, container){
-    this.amount = amount;
-    this.power = power;
-
-    var WATER_BOILING_POINT = 100;
-    var WATER_HEAT_CAPACITY = 4220;
-    var EFFICIENCY_FACTOR = 0.8;
-
-    var calculateTempDiff = new calculateTempDifference(startTemperature, WATER_BOILING_POINT);
-    var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, amount, calculateTempDiff.tempDifference);
-    var heaterEffectivePower = new calculateHeaterEffectivePower(power, EFFICIENCY_FACTOR);
-    var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
-
-    var timer, interval, minutes, seconds;
-
-    Machine.call(this);
-
-    function isReady() {
-      console.log('Your coffee is ready');
-    }
-
-    function isCanceled() {
-      console.log('You canceled operation');
-    }
-
-    function displayTimer(duration, container) {
-      timer = duration;
-      minutes = 1;
-      seconds = 60;
-
-      interval = setInterval(function () {
-          minutes = parseInt(timer / 60, 10)
-          seconds = parseInt(timer % 60, 10);
-
-          minutes = minutes < 10 ? "0" + minutes : minutes;
-          seconds = seconds < 10 ? "0" + seconds : seconds;
-
-          container.textContent = minutes + ":" + seconds;
-
-          if (--timer < 0) {
-              timer = duration;
-              clearInterval(interval);
-          }
-      }, 1000);
-    }
-
-    function clearTimer(container) {
-      container.textContent = '00:00';
-      clearInterval(interval);
-    }
-  };
-
-  var borkRun = document.querySelector('#runBork');
-  var borkStop = document.querySelector('#stopBork')
-  var tefalRun = document.querySelector('#runTefal');
-  var tefalStop = document.querySelector('#stopTefal')
-  var container = document.querySelector('.timer');
-
-  function disabler(itemToDisable, bool) {
-    itemToDisable.disabled = bool;
-  };
-
-  var BORK;
-  borkRun.addEventListener('click', function(){
-    disabler(borkStop, false);
-
-    BORK = new coffeeMachine(0.3, 2000, 80, container);
-    BORK.run();
-  });
-
-  borkStop.addEventListener('click', function(){
-    disabler(borkStop, true);
-
-    BORK.stop();
-  });
-
-  var Tefal;
-  tefalRun.addEventListener('click', function(){
-    disabler(tefalStop, false);
-
-    Tefal = new coffeeMachine(0.35, 3000, 80, container);
-    Tefal.run();
-  });
-
-  tefalStop.addEventListener('click', function(){
-    disabler(tefalStop, true);
-
-    Tefal.stop();
-  });
-
   var WATER_BOILING_POINT = 100;
   var WATER_HEAT_CAPACITY = 4220;
   var SNOW_TEMP = -16;
   var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
   var heaterPower = 2200; // average electric kettle power (in kilowatts)
   var snowMass = 1.7; // average amount of kettles (liters or kilos)
+
+  function coffeeMachine(amount, power, startTemperature, container){
+
+    Machine.apply(this, arguments);
+
+    var dataForBoilingTime = [startTemperature, WATER_BOILING_POINT, power, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, amount];
+
+    var parent = this;
+
+    this.run = function() {
+      parent.enable.call(this);
+      var seconds = new BoilingTime(dataForBoilingTime).seconds;
+      console.log(this._enabled);
+      displayTimer(seconds);
+
+      if (this._enabled){
+
+      }
+    };
+
+    this.stop = function() {
+      parent.disable.call(this);
+      console.log(this._enabled);
+      clearTimer();
+    };
+
+    var interval;
+
+    function displayTimer(seconds) {
+      var seconds_left = Math.floor(seconds);
+
+      interval = setInterval(function() {
+        container.innerHTML = --seconds_left;
+
+        if (seconds_left <= 0)
+        {
+          container.innerHTML = 'Your coffee is ready';
+          isReady();
+          clearInterval(interval);
+        }
+      }, 1000);
+    };
+
+    function clearTimer(){
+      clearInterval(interval);
+      isCanceled();
+    }
+
+    function isReady() {
+      container.innerHTML = 'Your coffee is ready';
+    };
+
+    function isCanceled() {
+      container.innerHTML = 'You canceled';
+    };
+  };
+
+
+  var borkRun = document.querySelector('#runBork');
+  var borkStop = document.querySelector('#stopBork');
+  var tefalRun = document.querySelector('#runTefal');
+  var tefalStop = document.querySelector('#stopTefal');
+  var container = document.querySelector('.timer');
+
+  var BORK = new coffeeMachine(0.3, 2000, 20, container);
+  borkRun.addEventListener('click', function(){
+    BORK.run(this);
+  });
+
+  borkStop.addEventListener('click', function(){
+    BORK.stop(this);
+  });
+
+  var Tefal = new coffeeMachine(0.35, 3000, 20, container);
+  tefalRun.addEventListener('click', function(){
+    Tefal.run(this);
+  });
+
+  tefalStop.addEventListener('click', function(){
+    Tefal.stop(this);
+  });
 
   var boilSnow = new BoilingTime([SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass]);
 

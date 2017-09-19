@@ -1,4 +1,5 @@
-<h3>Bolign point calculator</h3>
+<!DOCTYPE html>
+<!-- <h3>Bolign point calculator</h3>
 <p>Calculate time to boil different substance, enter name and data (you can find all the data in the internet).</p>
 <p>For example start temperature of snow is -16 C, boiling temperature of water is 100 C (snow converts to water).</p>
 <p>You can use electric kettle as a heater, It's power ~2200 watts and effective power is 0.8 (this depends on the wires, the environment and so on - 1 is fully effective).</p>
@@ -52,183 +53,264 @@ All of these inputs are <strong>requared:</strong></p>
 <button id='stopTefal' disabled>stop Tefal</button>
 <br>
 <br>
-<span>Time until you get fresh cup of coffee: </span> <span class='timer'></span>
+<span>Time until you get fresh cup of coffee: </span> <span class='timer'></span> -->
 
 <script>
-  function Formulas() {
-    this.tempDifference = function(startPoint, endPoint) {
-      return (endPoint - startPoint);
-    };
+function Machine(power) {
+  this._power = power;
+  this._enabled = false;
+};
 
-    this.heaterEffectivePower = function(power, efficiencyFactor) {
-      return (power * efficiencyFactor);
-    };
+Machine.prototype.enable = function() {
+  if (this._enabled) {
+    console.log('already in use');
+  };
 
-    this.heat = function(heatCapacity, weight, tempDiff) {
-      return (heatCapacity * tempDiff * weight);
-    };
+  this._enabled = true;
+  console.log(this._enabled);
+};
 
-    this.seconds = function (heatNeeded, heatEffectivePower) {
-      return (heatNeeded / heatEffectivePower);
-    };
+Machine.prototype.disable = function() {
+  if (!this._enabled) {
+    console.log('already disabled');
+  };
+  
+  this._enabled = false;
+  console.log(this._enabled);
+};
+
+Machine.prototype.setPower = function(amount) {
+  this._power = amount;
+};
+
+Machine.prototype.getPower = function() {
+  return this._power;
+};
+
+function Fridge(power, food) {
+  Machine.apply(this, arguments);
+  this._food = food;
+  this._space = power / 100;
+}
+
+Fridge.prototype = Object.create(Machine.prototype);
+Fridge.prototype.constructor = Fridge;
+
+Fridge.prototype.addFood = function(item) {
+  if (this._space < this._food.length + 1) {
+    throw new Error('No more space');
   }
 
-  function Machine() {
-    this.enabled = false;
+  this._food.push(item);
+};
 
-    this.run = function() {
-      // displayTimer(getBoilingTime.seconds, container);
-      this.enabled = true;
-      console.log('machine is running');
-
-      // setTimeout(function(){
-      //   isReady();
-      // }, getBoilingTime.seconds*1000);
+Fridge.prototype.gatherFood = function(name) {
+  var match = this._food.find(function(item, index, array){
+    if (name === item) {
+      array.splice(index, 1);
     };
+  });
 
-    this.stop = function() {
-      this.enabled = false;
-      console.log('machine stopped');
-      // clearTimer(container);
-      // isCanceled();
-    };
+  if (!match) {
+    throw new Error("There is no such product in the Fridge");
   }
+};
 
-  function BoilingTime(data) {
-    Formulas.call(this);
-    var parent = this;
+Fridge.prototype.enable = function(delay) {
+  setTimeout(function(){
+    Machine.prototype.enable.apply(this, arguments)
+  }, delay);
+};
 
-    this.tempDifference = parent.tempDifference(data[0], data[1]);
-    this.heaterEffectivePower = parent.heaterEffectivePower(data[2], data[3]);
-    this.heat = parent.heat(data[4], data[5], this.tempDifference);
-    this.seconds = parent.seconds(this.heat, this.heaterEffectivePower);
-  };
+Fridge.prototype.disable = function(delay) {
+  setTimeout(function(){
+    Machine.prototype.disable.apply(this, arguments)
+  }, delay);
+};
 
-  function coffeeMachine(amount, power, startTemperature, container){
-    this.amount = amount;
-    this.power = power;
+var bosch = new Fridge(500, ['apples','milk','beer']);
+bosch.enable(1000);
+bosch.disable(2000);
+bosch.disable(3000);
+bosch.addFood('butter');
+bosch.addFood('ice-cream');
+bosch.gatherFood('apples');
+console.log(bosch);
 
-    var WATER_BOILING_POINT = 100;
-    var WATER_HEAT_CAPACITY = 4220;
-    var EFFICIENCY_FACTOR = 0.8;
+  // function Formulas() {
+  //   this.tempDifference = function(startPoint, endPoint) {
+  //     return (endPoint - startPoint);
+  //   };
 
-    var calculateTempDiff = new calculateTempDifference(startTemperature, WATER_BOILING_POINT);
-    var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, amount, calculateTempDiff.tempDifference);
-    var heaterEffectivePower = new calculateHeaterEffectivePower(power, EFFICIENCY_FACTOR);
-    var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
+  //   this.heaterEffectivePower = function(power, efficiencyFactor) {
+  //     return (power * efficiencyFactor);
+  //   };
 
-    var timer, interval, minutes, seconds;
+  //   this.heat = function(heatCapacity, weight, tempDiff) {
+  //     return (heatCapacity * tempDiff * weight);
+  //   };
 
-    Machine.call(this);
+  //   this.seconds = function (heatNeeded, heatEffectivePower) {
+  //     return (heatNeeded / heatEffectivePower);
+  //   };
+  // }
 
-    function isReady() {
-      console.log('Your coffee is ready');
-    }
+  // function Machine() {
+  //   this.enabled = false;
 
-    function isCanceled() {
-      console.log('You canceled operation');
-    }
+  //   this.run = function() {
+  //     // displayTimer(getBoilingTime.seconds, container);
+  //     this.enabled = true;
+  //     console.log('machine is running');
 
-    function displayTimer(duration, container) {
-      timer = duration;
-      minutes = 1;
-      seconds = 60;
+  //     // setTimeout(function(){
+  //     //   isReady();
+  //     // }, getBoilingTime.seconds*1000);
+  //   };
 
-      interval = setInterval(function () {
-          minutes = parseInt(timer / 60, 10)
-          seconds = parseInt(timer % 60, 10);
+  //   this.stop = function() {
+  //     this.enabled = false;
+  //     console.log('machine stopped');
+  //     // clearTimer(container);
+  //     // isCanceled();
+  //   };
+  // }
 
-          minutes = minutes < 10 ? "0" + minutes : minutes;
-          seconds = seconds < 10 ? "0" + seconds : seconds;
+  // function BoilingTime(data) {
+  //   Formulas.call(this);
+  //   var parent = this;
 
-          container.textContent = minutes + ":" + seconds;
+  //   this.tempDifference = parent.tempDifference(data[0], data[1]);
+  //   this.heaterEffectivePower = parent.heaterEffectivePower(data[2], data[3]);
+  //   this.heat = parent.heat(data[4], data[5], this.tempDifference);
+  //   this.seconds = parent.seconds(this.heat, this.heaterEffectivePower);
+  // };
 
-          if (--timer < 0) {
-              timer = duration;
-              clearInterval(interval);
-          }
-      }, 1000);
-    }
+  // function coffeeMachine(amount, power, startTemperature, container){
+  //   this.amount = amount;
+  //   this.power = power;
 
-    function clearTimer(container) {
-      container.textContent = '00:00';
-      clearInterval(interval);
-    }
-  };
+  //   var WATER_BOILING_POINT = 100;
+  //   var WATER_HEAT_CAPACITY = 4220;
+  //   var EFFICIENCY_FACTOR = 0.8;
 
-  var borkRun = document.querySelector('#runBork');
-  var borkStop = document.querySelector('#stopBork')
-  var tefalRun = document.querySelector('#runTefal');
-  var tefalStop = document.querySelector('#stopTefal')
-  var container = document.querySelector('.timer');
+  //   var calculateTempDiff = new calculateTempDifference(startTemperature, WATER_BOILING_POINT);
+  //   var heatNeeded = new calculateHeatNeeded(WATER_HEAT_CAPACITY, amount, calculateTempDiff.tempDifference);
+  //   var heaterEffectivePower = new calculateHeaterEffectivePower(power, EFFICIENCY_FACTOR);
+  //   var getBoilingTime = new calculateMinutesNeeded(heatNeeded.heatNeeded, heaterEffectivePower.effectivePower);
 
-  function disabler(itemToDisable, bool) {
-    itemToDisable.disabled = bool;
-  };
+  //   var timer, interval, minutes, seconds;
 
-  var BORK;
-  borkRun.addEventListener('click', function(){
-    disabler(borkStop, false);
+  //   Machine.call(this);
 
-    BORK = new coffeeMachine(0.3, 2000, 80, container);
-    BORK.run();
-  });
+  //   function isReady() {
+  //     console.log('Your coffee is ready');
+  //   }
 
-  borkStop.addEventListener('click', function(){
-    disabler(borkStop, true);
+  //   function isCanceled() {
+  //     console.log('You canceled operation');
+  //   }
 
-    BORK.stop();
-  });
+  //   function displayTimer(duration, container) {
+  //     timer = duration;
+  //     minutes = 1;
+  //     seconds = 60;
 
-  var Tefal;
-  tefalRun.addEventListener('click', function(){
-    disabler(tefalStop, false);
+  //     interval = setInterval(function () {
+  //         minutes = parseInt(timer / 60, 10)
+  //         seconds = parseInt(timer % 60, 10);
 
-    Tefal = new coffeeMachine(0.35, 3000, 80, container);
-    Tefal.run();
-  });
+  //         minutes = minutes < 10 ? "0" + minutes : minutes;
+  //         seconds = seconds < 10 ? "0" + seconds : seconds;
 
-  tefalStop.addEventListener('click', function(){
-    disabler(tefalStop, true);
+  //         container.textContent = minutes + ":" + seconds;
 
-    Tefal.stop();
-  });
+  //         if (--timer < 0) {
+  //             timer = duration;
+  //             clearInterval(interval);
+  //         }
+  //     }, 1000);
+  //   }
 
-  var WATER_BOILING_POINT = 100;
-  var WATER_HEAT_CAPACITY = 4220;
-  var SNOW_TEMP = -16;
-  var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
-  var heaterPower = 2200; // average electric kettle power (in kilowatts)
-  var snowMass = 1.7; // average amount of kettles (liters or kilos)
+  //   function clearTimer(container) {
+  //     container.textContent = '00:00';
+  //     clearInterval(interval);
+  //   }
+  // };
 
-  var boilSnow = new BoilingTime([SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass]);
+  // var borkRun = document.querySelector('#runBork');
+  // var borkStop = document.querySelector('#stopBork')
+  // var tefalRun = document.querySelector('#runTefal');
+  // var tefalStop = document.querySelector('#stopTefal')
+  // var container = document.querySelector('.timer');
 
-  var resultExampleContainer = document.querySelector('#resultExample strong');
+  // function disabler(itemToDisable, bool) {
+  //   itemToDisable.disabled = bool;
+  // };
 
-  resultExampleContainer.innerHTML = 'The time you need to boil ' + snowMass + 'kg of snow is ' + (boilSnow.seconds / 60) + ' minutes';
+  // var BORK;
+  // borkRun.addEventListener('click', function(){
+  //   disabler(borkStop, false);
 
-  var boilingForm = document.querySelector('#boiling');
-  var resultContainer = document.querySelector('#result strong');
+  //   BORK = new coffeeMachine(0.3, 2000, 80, container);
+  //   BORK.run();
+  // });
 
-  boilingForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+  // borkStop.addEventListener('click', function(){
+  //   disabler(borkStop, true);
 
-    var elements = boilingForm.elements;
-    var data = [];
+  //   BORK.stop();
+  // });
 
-    for (var i = 0, element; element = elements[i++];) {
-        if (element.type !== "number") {
-          continue;
-        } else {
-          data.push(parseFloat(element.value));
-        }
-    }
+  // var Tefal;
+  // tefalRun.addEventListener('click', function(){
+  //   disabler(tefalStop, false);
 
-    var minutesToBoil = new BoilingTime(data);
-    var name = boilingForm.name.value;
-    var weight = boilingForm.weight.value;
+  //   Tefal = new coffeeMachine(0.35, 3000, 80, container);
+  //   Tefal.run();
+  // });
 
-    resultContainer.innerHTML = 'The time you need to boil ' + weight + ' kg of ' + name + ' are ' + (minutesToBoil.seconds / 60) + ' minutes';
-  });
+  // tefalStop.addEventListener('click', function(){
+  //   disabler(tefalStop, true);
+
+  //   Tefal.stop();
+  // });
+
+  // var WATER_BOILING_POINT = 100;
+  // var WATER_HEAT_CAPACITY = 4220;
+  // var SNOW_TEMP = -16;
+  // var EFFICIENCY_FACTOR = 0.8; // average efficiency of kettles, 1 is fully efficiency
+  // var heaterPower = 2200; // average electric kettle power (in kilowatts)
+  // var snowMass = 1.7; // average amount of kettles (liters or kilos)
+
+  // var boilSnow = new BoilingTime([SNOW_TEMP, WATER_BOILING_POINT, heaterPower, EFFICIENCY_FACTOR, WATER_HEAT_CAPACITY, snowMass]);
+
+  // var resultExampleContainer = document.querySelector('#resultExample strong');
+
+  // resultExampleContainer.innerHTML = 'The time you need to boil ' + snowMass + 'kg of snow is ' + (boilSnow.seconds / 60) + ' minutes';
+
+  // var boilingForm = document.querySelector('#boiling');
+  // var resultContainer = document.querySelector('#result strong');
+
+  // boilingForm.addEventListener('submit', function(e) {
+  //   e.preventDefault();
+
+  //   var elements = boilingForm.elements;
+  //   var data = [];
+
+  //   for (var i = 0, element; element = elements[i++];) {
+  //       if (element.type !== "number") {
+  //         continue;
+  //       } else {
+  //         data.push(parseFloat(element.value));
+  //       }
+  //   }
+
+  //   var minutesToBoil = new BoilingTime(data);
+  //   var name = boilingForm.name.value;
+  //   var weight = boilingForm.weight.value;
+
+  //   resultContainer.innerHTML = 'The time you need to boil ' + weight + ' kg of ' + name + ' are ' + (minutesToBoil.seconds / 60) + ' minutes';
+  // });
 
 </script>
